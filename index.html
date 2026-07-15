@@ -1,0 +1,1694 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>濱松屋各項指標互動儀表板</title>
+  <style>
+    :root {
+      --paper: #f5fbf7;
+      --panel: #fffefd;
+      --panel-soft: #eef8f1;
+      --ink: #263533;
+      --muted: #6f827b;
+      --line: #d7ebe0;
+      --grid: #d6e8df;
+      --tick: #667973;
+      --active-bg: #4f8f82;
+      --active-ink: #fffefd;
+      --hamamatsu: #ee8f8b;
+      --average: #b8a9db;
+      --blue: #6eb7a7;
+      --orange: #f2b184;
+      --green: #9cc7e3;
+      --cyan: #a6d7c8;
+      --series-price-value: #65ad9f;
+      --series-recommend: #9ac86e;
+      --series-service-flow: #6fbe8f;
+      --series-atmosphere: #b8a9db;
+      --series-wait: #78bfd2;
+      --series-mild-negative: #f2b184;
+      --series-pain-point: #ee8f8b;
+      --selected: #4f8f82;
+      --shadow: 0 18px 42px rgba(91, 126, 112, 0.15);
+      --selected-shadow: 0 8px 16px rgba(79, 143, 130, 0.28);
+      --radius: 8px;
+      color-scheme: light;
+    }
+
+    body[data-theme="cyber"] {
+      --paper: #05030d;
+      --panel: #0d0a1c;
+      --panel-soft: #14102b;
+      --ink: #f8f2ff;
+      --muted: #b6acd7;
+      --line: #35265f;
+      --grid: #2d2850;
+      --tick: #a59bd2;
+      --active-bg: #00f5ff;
+      --active-ink: #090716;
+      --hamamatsu: #ff3864;
+      --average: #ff9f1c;
+      --blue: #00e5ff;
+      --orange: #ff2bd6;
+      --green: #a8ff3e;
+      --cyan: #7b61ff;
+      --series-price-value: #00e5ff;
+      --series-recommend: #a8ff3e;
+      --series-service-flow: #39ff88;
+      --series-atmosphere: #9d7cff;
+      --series-wait: #00ffa3;
+      --series-mild-negative: #ff9f1c;
+      --series-pain-point: #ff3864;
+      --selected: #faff00;
+      --shadow: 0 20px 60px rgba(0, 245, 255, 0.14);
+      --selected-shadow: 0 0 18px rgba(250, 255, 0, 0.52);
+      color-scheme: dark;
+    }
+
+    body[data-theme="business"] {
+      --paper: #071426;
+      --panel: #0c1e36;
+      --panel-soft: #112a49;
+      --ink: #eef6ff;
+      --muted: #9fb3ca;
+      --line: #203d5e;
+      --grid: #1b3554;
+      --tick: #a9bdd6;
+      --active-bg: #d7e8ff;
+      --active-ink: #071426;
+      --hamamatsu: #00d4ff;
+      --average: #8aa4c8;
+      --blue: #2ba7ff;
+      --orange: #42d6a4;
+      --green: #8e7dff;
+      --cyan: #f2c94c;
+      --series-price-value: #2ba7ff;
+      --series-recommend: #58c7a7;
+      --series-service-flow: #42d6a4;
+      --series-atmosphere: #8e7dff;
+      --series-wait: #56cfe1;
+      --series-mild-negative: #f2c94c;
+      --series-pain-point: #ff6b6b;
+      --selected: #ffffff;
+      --shadow: 0 20px 58px rgba(0, 0, 0, 0.28);
+      --selected-shadow: 0 0 20px rgba(43, 167, 255, 0.42);
+      color-scheme: dark;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", system-ui, sans-serif;
+      background:
+        linear-gradient(180deg, color-mix(in srgb, var(--panel) 78%, transparent), color-mix(in srgb, var(--paper) 76%, transparent)),
+        radial-gradient(circle at 12% 0%, color-mix(in srgb, var(--selected) 14%, transparent), transparent 34%),
+        var(--paper);
+      color: var(--ink);
+      transition: background 520ms ease, color 520ms ease;
+    }
+
+    button {
+      font: inherit;
+    }
+
+    .page {
+      width: min(1480px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 28px 0 44px;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 20px;
+      margin-bottom: 22px;
+    }
+
+    .title-block h1 {
+      margin: 0;
+      font-size: clamp(28px, 4vw, 54px);
+      line-height: 1.05;
+      letter-spacing: 0;
+      font-weight: 800;
+    }
+
+    .title-block p {
+      margin: 10px 0 0;
+      color: var(--muted);
+      font-size: clamp(15px, 1.4vw, 19px);
+      line-height: 1.55;
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .chip, .icon-button {
+      border: 1px solid var(--line);
+      background: color-mix(in srgb, var(--panel) 86%, transparent);
+      color: var(--ink);
+      border-radius: 999px;
+      min-height: 40px;
+      padding: 0 15px;
+      cursor: pointer;
+      transition: border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease, background 180ms ease;
+    }
+
+    .chip:hover, .icon-button:hover {
+      border-color: color-mix(in srgb, var(--selected) 58%, var(--line));
+      box-shadow: 0 8px 20px color-mix(in srgb, var(--selected) 18%, transparent);
+      transform: translateY(-1px);
+    }
+
+    .chip.is-active {
+      background: var(--active-bg);
+      color: var(--active-ink);
+      border-color: var(--active-bg);
+    }
+
+    .theme-switch {
+      display: inline-flex;
+      gap: 4px;
+      padding: 4px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: color-mix(in srgb, var(--panel) 78%, transparent);
+    }
+
+    .theme-button {
+      border: 0;
+      border-radius: 999px;
+      background: transparent;
+      color: var(--muted);
+      min-height: 32px;
+      padding: 0 12px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 800;
+      transition: background 220ms ease, color 220ms ease, transform 220ms ease;
+    }
+
+    .theme-button:hover {
+      transform: translateY(-1px);
+      color: var(--ink);
+    }
+
+    .theme-button.is-active {
+      background: var(--active-bg);
+      color: var(--active-ink);
+    }
+
+    .dashboard {
+      display: grid;
+      grid-template-columns: minmax(0, 1.6fr) minmax(310px, 0.72fr);
+      gap: 18px;
+      align-items: start;
+    }
+
+    .main-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .full {
+      grid-column: 1 / -1;
+    }
+
+    .panel {
+      background: color-mix(in srgb, var(--panel) 90%, transparent);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      transition: background 520ms ease, border-color 520ms ease, box-shadow 520ms ease;
+    }
+
+    .panel-header {
+      display: flex;
+      align-items: start;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 18px 18px 4px;
+    }
+
+    .panel-header h2 {
+      margin: 0;
+      font-size: 20px;
+      line-height: 1.3;
+      letter-spacing: 0;
+    }
+
+    .panel-header p {
+      margin: 7px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+      min-height: 19px;
+      transition: opacity 240ms ease, transform 240ms ease, color 520ms ease;
+    }
+
+    .panel-header p.is-fading {
+      opacity: 0;
+      transform: translateY(4px);
+    }
+
+    .legend {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: flex-end;
+      padding-top: 2px;
+    }
+
+    .legend span {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--muted);
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    .swatch {
+      width: 10px;
+      height: 10px;
+      border-radius: 2px;
+      display: inline-block;
+    }
+
+    .comment-tabs {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: var(--panel-soft);
+    }
+
+    .comment-tab {
+      border: 0;
+      border-radius: 999px;
+      background: transparent;
+      color: var(--muted);
+      min-height: 32px;
+      padding: 0 12px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 700;
+      transition: background 180ms ease, color 180ms ease;
+    }
+
+    .comment-tab.is-active {
+      background: var(--active-bg);
+      color: var(--active-ink);
+    }
+
+    .chart-wrap {
+      padding: 4px 14px 16px;
+      min-height: 310px;
+    }
+
+    .chart-wrap.tall {
+      min-height: 500px;
+    }
+
+    .chart-svg {
+      display: block;
+      width: 100%;
+      height: auto;
+      overflow: visible;
+      user-select: none;
+    }
+
+    .axis, .grid-line {
+      stroke: var(--grid);
+      stroke-width: 1;
+      shape-rendering: crispEdges;
+    }
+
+    .axis-label, .tick-label, .bar-label, .store-label {
+      fill: var(--ink);
+      font-weight: 700;
+    }
+
+    .tick-label {
+      font-size: 12px;
+      fill: var(--tick);
+      font-weight: 500;
+    }
+
+    .axis-label {
+      font-size: 13px;
+    }
+
+    .bar-label {
+      font-size: 13px;
+    }
+
+    .bar-label.value-label {
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 360ms ease, transform 360ms ease, fill 520ms ease;
+      transform: translateY(4px);
+    }
+
+    .bar-label.value-label.is-visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .bar, .hit-zone {
+      cursor: pointer;
+    }
+
+    .bar {
+      transition: opacity 680ms cubic-bezier(.2,.8,.2,1), filter 680ms cubic-bezier(.2,.8,.2,1), fill 680ms cubic-bezier(.2,.8,.2,1);
+    }
+
+    .bar.is-dim {
+      opacity: 0.24;
+      filter: saturate(0.66);
+    }
+
+    .bar.is-selected {
+      opacity: 1;
+      filter: saturate(1.35) brightness(1.08) drop-shadow(var(--selected-shadow));
+    }
+
+    .side {
+      position: sticky;
+      top: 18px;
+      display: grid;
+      gap: 18px;
+    }
+
+    .kpis {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      padding: 16px;
+    }
+
+    .kpi {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 14px;
+      background: var(--panel-soft);
+      min-height: 104px;
+    }
+
+    .kpi small {
+      color: var(--muted);
+      display: block;
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    .kpi strong {
+      display: block;
+      margin-top: 8px;
+      font-size: clamp(24px, 3vw, 34px);
+      line-height: 1;
+    }
+
+    .store-list {
+      padding: 12px 16px 16px;
+      display: grid;
+      gap: 8px;
+    }
+
+    .store-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 12px;
+      width: 100%;
+      border: 1px solid transparent;
+      background: transparent;
+      border-radius: 7px;
+      padding: 9px 10px;
+      color: var(--ink);
+      cursor: pointer;
+      text-align: left;
+    }
+
+    .store-row:hover {
+      background: var(--panel-soft);
+      border-color: var(--line);
+    }
+
+    .store-row.is-active {
+      background: var(--active-bg);
+      border-color: var(--active-bg);
+      color: var(--active-ink);
+    }
+
+    .store-row span {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-weight: 700;
+    }
+
+    .store-row b {
+      font-variant-numeric: tabular-nums;
+    }
+
+    .focus-card {
+      padding: 16px;
+    }
+
+    .focus-name {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .focus-name h3 {
+      margin: 0;
+      font-size: 22px;
+      line-height: 1.2;
+    }
+
+    .rank-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 44px;
+      height: 30px;
+      padding: 0 9px;
+      border-radius: 999px;
+      background: color-mix(in srgb, var(--selected) 16%, transparent);
+      color: var(--selected);
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .metrics {
+      display: grid;
+      gap: 10px;
+    }
+
+    .metric-line {
+      display: grid;
+      grid-template-columns: 92px minmax(0, 1fr) 56px;
+      gap: 10px;
+      align-items: center;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .meter {
+      position: relative;
+      height: 8px;
+      border-radius: 999px;
+      background: color-mix(in srgb, var(--muted) 22%, transparent);
+      overflow: hidden;
+    }
+
+    .meter i {
+      display: block;
+      height: 100%;
+      width: 0%;
+      border-radius: inherit;
+      background: var(--blue);
+      transition: width 850ms cubic-bezier(.2,.8,.2,1);
+    }
+
+    .metric-line b {
+      text-align: right;
+      color: var(--ink);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .insights {
+      display: grid;
+      gap: 10px;
+      padding: 0 16px 16px;
+    }
+
+    .insight {
+      border-top: 1px solid var(--line);
+      padding-top: 11px;
+      color: var(--muted);
+      line-height: 1.5;
+      font-size: 14px;
+    }
+
+    .insight b {
+      color: var(--ink);
+    }
+
+    .tooltip {
+      position: fixed;
+      pointer-events: none;
+      z-index: 10;
+      padding: 9px 10px;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      background: color-mix(in srgb, var(--active-bg) 92%, var(--paper));
+      color: var(--active-ink);
+      box-shadow: 0 10px 22px color-mix(in srgb, var(--paper) 35%, transparent);
+      font-size: 13px;
+      line-height: 1.45;
+      transform: translate(12px, 12px);
+      opacity: 0;
+      transition: opacity 120ms ease;
+      max-width: 260px;
+    }
+
+    .tooltip.is-visible {
+      opacity: 1;
+    }
+
+    @media (max-width: 1060px) {
+      .dashboard {
+        grid-template-columns: 1fr;
+      }
+
+      .side {
+        position: static;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      }
+    }
+
+    @media (max-width: 760px) {
+      .page {
+        width: min(100% - 20px, 1480px);
+        padding-top: 18px;
+      }
+
+      .topbar {
+        align-items: start;
+        flex-direction: column;
+      }
+
+      .actions {
+        justify-content: flex-start;
+      }
+
+      .main-grid, .side {
+        grid-template-columns: 1fr;
+      }
+
+      .panel-header {
+        flex-direction: column;
+      }
+
+      .legend {
+        justify-content: flex-start;
+      }
+
+      .chart-wrap {
+        min-height: 260px;
+        padding-inline: 8px;
+      }
+
+      .chart-wrap.tall {
+        min-height: 430px;
+      }
+    }
+  </style>
+</head>
+<body data-theme="light">
+  <div class="page">
+    <header class="topbar">
+      <div class="title-block">
+        <h1>濱松屋各項指標</h1>
+        <p>六間鰻魚飯餐廳比較、濱松屋留言優勢與待改善面向。</p>
+      </div>
+      <div class="actions" role="group" aria-label="圖表控制">
+        <button class="chip is-active" data-filter="all">全部餐廳</button>
+        <button class="chip" data-filter="hamamatsu">濱松屋焦點</button>
+        <button class="chip" data-filter="top">高滿意組</button>
+        <div class="theme-switch" role="group" aria-label="配色模式">
+          <button class="theme-button" data-theme="cyber">深色</button>
+          <button class="theme-button" data-theme="business">商業</button>
+          <button class="theme-button is-active" data-theme="light">淺色</button>
+        </div>
+        <button class="icon-button" id="toggleValues" aria-pressed="false">顯示所有數值</button>
+        <button class="icon-button" id="replay" aria-label="重播動畫">重播動畫</button>
+      </div>
+    </header>
+
+    <main class="dashboard">
+      <section class="main-grid">
+        <article class="panel full">
+          <div class="panel-header">
+            <div>
+              <h2>平均星等比較</h2>
+              <p id="starSubtitle">點擊任一餐廳長條，可查看星等高於或低於六店平均多少。</p>
+            </div>
+            <div class="legend"><span><i class="swatch" style="background:var(--blue)"></i>平均星等</span></div>
+          </div>
+          <div class="chart-wrap" id="starChart"></div>
+        </article>
+
+        <article class="panel full">
+          <div class="panel-header">
+            <div>
+              <h2>高滿意比例與待改善比例</h2>
+              <p id="satisfactionSubtitle">點擊高滿意或待改善長條，可查看該比例與六店平均的差距。</p>
+            </div>
+            <div class="legend">
+              <span><i class="swatch" style="background:var(--blue)"></i>高滿意比例</span>
+              <span><i class="swatch" style="background:var(--orange)"></i>待改善比例</span>
+            </div>
+          </div>
+          <div class="chart-wrap" id="satisfactionChart"></div>
+        </article>
+
+        <article class="panel full">
+          <div class="panel-header">
+            <div>
+              <h2>餐點、服務、氣氛評分</h2>
+              <p id="scoreSubtitle">點擊餐點、服務、氣氛長條，可查看該評分高於或低於六店平均。</p>
+            </div>
+            <div class="legend">
+              <span><i class="swatch" style="background:var(--blue)"></i>餐點</span>
+              <span><i class="swatch" style="background:var(--orange)"></i>服務</span>
+              <span><i class="swatch" style="background:var(--green)"></i>氣氛</span>
+            </div>
+          </div>
+          <div class="chart-wrap" id="scoreChart"></div>
+        </article>
+
+        <article class="panel full">
+          <div class="panel-header">
+            <div>
+              <h2>7 大行銷面向提及比例</h2>
+              <p id="marketingSubtitle">此區塊為客戶文字留言提及七大面向指標比例。</p>
+            </div>
+            <div class="legend">
+              <span><i class="swatch" style="background:var(--series-price-value)"></i>價格價值感</span>
+              <span><i class="swatch" style="background:var(--series-recommend)"></i>推薦再訪</span>
+              <span><i class="swatch" style="background:var(--series-service-flow)"></i>服務流程</span>
+              <span><i class="swatch" style="background:var(--series-atmosphere)"></i>空間氣氛</span>
+              <span><i class="swatch" style="background:var(--series-wait)"></i>等待效率</span>
+              <span><i class="swatch" style="background:var(--series-mild-negative)"></i>輕度負面</span>
+              <span><i class="swatch" style="background:var(--series-pain-point)"></i>負面痛點</span>
+            </div>
+          </div>
+          <div class="chart-wrap tall" id="marketingChart"></div>
+        </article>
+
+        <article class="panel full">
+          <div class="panel-header">
+            <div>
+              <h2>平均消費金額</h2>
+              <p id="priceSubtitle">點擊任一餐廳長條，可查看平均消費高於或低於六店平均多少元。</p>
+            </div>
+            <div class="legend"><span><i class="swatch" style="background:var(--cyan)"></i>元</span></div>
+          </div>
+          <div class="chart-wrap" id="priceChart"></div>
+        </article>
+
+        <article class="panel full">
+          <div class="panel-header">
+            <div>
+              <h2 id="commentChartTitle">濱松屋優勢留言</h2>
+              <p id="commentChartSubtitle">高滿意評論中提及該面向的比例；已排除輕度負面與負面痛點。</p>
+            </div>
+            <div>
+              <div class="comment-tabs" role="group" aria-label="留言圖表切換">
+                <button class="comment-tab is-active" data-comment-mode="advantage">優勢留言</button>
+                <button class="comment-tab" data-comment-mode="weakness">待改善留言</button>
+              </div>
+              <div class="legend" style="margin-top:10px">
+                <span><i class="swatch" style="background:var(--hamamatsu)"></i>濱松屋</span>
+                <span><i class="swatch" style="background:var(--average)"></i>六店平均</span>
+              </div>
+            </div>
+          </div>
+          <div class="chart-wrap tall" id="commentChart"></div>
+        </article>
+      </section>
+
+      <aside class="side">
+        <article class="panel">
+          <div class="panel-header">
+            <div>
+              <h2>焦點摘要</h2>
+              <p id="summaryText">目前顯示全部餐廳。</p>
+            </div>
+          </div>
+          <div class="kpis">
+            <div class="kpi"><small>平均星等</small><strong data-kpi="star">0</strong></div>
+            <div class="kpi"><small>高滿意比例</small><strong data-kpi="satisfaction">0%</strong></div>
+            <div class="kpi"><small>待改善比例</small><strong data-kpi="improvement">0%</strong></div>
+            <div class="kpi"><small>平均消費</small><strong data-kpi="price">$0</strong></div>
+          </div>
+          <div class="focus-card">
+            <div class="focus-name">
+              <h3 id="focusName">濱松屋</h3>
+              <span class="rank-badge" id="focusRank">第 6</span>
+            </div>
+            <div class="metrics" id="focusMetrics"></div>
+          </div>
+          <div class="insights" id="insights"></div>
+        </article>
+
+        <article class="panel">
+          <div class="panel-header">
+            <div>
+              <h2>餐廳排行</h2>
+              <p>依平均星等排序。</p>
+            </div>
+          </div>
+          <div class="store-list" id="storeList"></div>
+        </article>
+      </aside>
+    </main>
+  </div>
+
+  <div class="tooltip" id="tooltip"></div>
+
+  <script>
+    let colors = {};
+
+    function readThemeColors() {
+      const styles = getComputedStyle(document.body);
+      const read = name => styles.getPropertyValue(name).trim();
+      colors = {
+        hamamatsu: read("--hamamatsu"),
+        average: read("--average"),
+        blue: read("--blue"),
+        orange: read("--orange"),
+        green: read("--green"),
+        cyan: read("--cyan"),
+        mPriceValue: read("--series-price-value"),
+        mRecommend: read("--series-recommend"),
+        mServiceFlow: read("--series-service-flow"),
+        mAtmosphere: read("--series-atmosphere"),
+        mWait: read("--series-wait"),
+        mMildNegative: read("--series-mild-negative"),
+        mPainPoint: read("--series-pain-point"),
+        selected: read("--selected")
+      };
+    }
+
+    const stores = [
+      { name: "劍持屋建國店", star: 4.53, satisfaction: 89.5, improvement: 10.5, price: 1046, food: 4.64, service: 4.64, atmosphere: 4.68, mPriceValue: 13.2, mRecommend: 44.7, mServiceFlow: 36.8, mAtmosphere: 50.0, mWait: 13.2, mMildNegative: 26.3, mPainPoint: 2.6 },
+      { name: "四代目菊川", star: 4.39, satisfaction: 86.8, improvement: 13.2, price: 1114, food: 4.55, service: 4.60, atmosphere: 4.42, mPriceValue: 34.2, mRecommend: 39.5, mServiceFlow: 47.4, mAtmosphere: 57.9, mWait: 21.1, mMildNegative: 28.9, mPainPoint: 0.0 },
+      { name: "小倉屋光復本店", star: 4.34, satisfaction: 86.8, improvement: 13.2, price: 972, food: 4.33, service: 4.58, atmosphere: 4.47, mPriceValue: 47.4, mRecommend: 42.1, mServiceFlow: 34.2, mAtmosphere: 57.9, mWait: 26.3, mMildNegative: 23.7, mPainPoint: 2.6 },
+      { name: "魚庄", star: 4.26, satisfaction: 76.3, improvement: 23.7, price: 1245, food: 4.29, service: 4.12, atmosphere: 4.52, mPriceValue: 28.9, mRecommend: 55.3, mServiceFlow: 60.5, mAtmosphere: 68.4, mWait: 15.8, mMildNegative: 36.8, mPainPoint: 18.4 },
+      { name: "鰻料理江戶川", star: 4.26, satisfaction: 76.3, improvement: 23.7, price: 708, food: 4.14, service: 4.42, atmosphere: 4.25, mPriceValue: 31.6, mRecommend: 57.9, mServiceFlow: 52.6, mAtmosphere: 55.3, mWait: 18.4, mMildNegative: 36.8, mPainPoint: 2.6 },
+      { name: "濱松屋", star: 4.16, satisfaction: 78.9, improvement: 21.1, price: 1132, food: 4.22, service: 4.31, atmosphere: 4.37, mPriceValue: 39.5, mRecommend: 47.4, mServiceFlow: 57.9, mAtmosphere: 50.0, mWait: 21.1, mMildNegative: 28.9, mPainPoint: 7.9 }
+    ];
+
+    const priceOrder = ["魚庄", "濱松屋", "四代目菊川", "劍持屋建國店", "小倉屋光復本店", "鰻料理江戶川"];
+    const advantages = [
+      { topic: "餐點品質", hamamatsu: 76.3, average: 80.7 },
+      { topic: "空間氣氛", hamamatsu: 44.7, average: 47.8 },
+      { topic: "推薦再訪", hamamatsu: 44.7, average: 41.7 },
+      { topic: "服務流程", hamamatsu: 36.8, average: 36.8 },
+      { topic: "價格價值感", hamamatsu: 28.9, average: 24.1 },
+      { topic: "等待效率", hamamatsu: 13.2, average: 16.2 }
+    ];
+
+    const weaknesses = [
+      { topic: "服務流程", hamamatsu: 21.1, average: 11.4 },
+      { topic: "餐點品質", hamamatsu: 21.1, average: 17.1 },
+      { topic: "輕度負面", hamamatsu: 13.2, average: 11.9 },
+      { topic: "價格價值感", hamamatsu: 10.5, average: 8.4 },
+      { topic: "等待效率", hamamatsu: 7.9, average: 3.1 },
+      { topic: "空間氣氛", hamamatsu: 5.3, average: 8.8 },
+      { topic: "負面痛點", hamamatsu: 5.3, average: 3.1 },
+      { topic: "推薦再訪", hamamatsu: 2.6, average: 6.1 }
+    ];
+
+    const state = {
+      selectedStore: null,
+      filter: "all",
+      activeChart: "star",
+      selectedMetric: "star",
+      selectedTopic: null,
+      selectedKey: null,
+      commentsMode: "advantage",
+      showAllValues: false
+    };
+
+    const tooltip = document.querySelector("#tooltip");
+    const format = {
+      one: value => `${value.toFixed(1)}%`,
+      two: value => value.toFixed(2),
+      price: value => `$${Math.round(value).toLocaleString("zh-TW")}`
+    };
+
+    const metricMeta = {
+      star: { label: "平均星等", unit: "分", formatter: value => value.toFixed(2), diffFormatter: value => value.toFixed(2), higherBetter: true },
+      satisfaction: { label: "高滿意比例", unit: "個百分點", formatter: format.one, diffFormatter: value => value.toFixed(1), higherBetter: true },
+      improvement: { label: "待改善比例", unit: "個百分點", formatter: format.one, diffFormatter: value => value.toFixed(1), higherBetter: false },
+      price: { label: "平均消費", unit: "元", formatter: format.price, diffFormatter: value => Math.round(value).toLocaleString("zh-TW"), higherBetter: null },
+      food: { label: "餐點", unit: "分", formatter: value => value.toFixed(2), diffFormatter: value => value.toFixed(2), higherBetter: true },
+      service: { label: "服務", unit: "分", formatter: value => value.toFixed(2), diffFormatter: value => value.toFixed(2), higherBetter: true },
+      atmosphere: { label: "氣氛", unit: "分", formatter: value => value.toFixed(2), diffFormatter: value => value.toFixed(2), higherBetter: true },
+      mPriceValue: { label: "價格價值感提及比例", unit: "個百分點", formatter: format.one, diffFormatter: value => value.toFixed(1), higherBetter: true },
+      mRecommend: { label: "推薦再訪提及比例", unit: "個百分點", formatter: format.one, diffFormatter: value => value.toFixed(1), higherBetter: true },
+      mServiceFlow: { label: "服務流程提及比例", unit: "個百分點", formatter: format.one, diffFormatter: value => value.toFixed(1), higherBetter: true },
+      mAtmosphere: { label: "空間氣氛提及比例", unit: "個百分點", formatter: format.one, diffFormatter: value => value.toFixed(1), higherBetter: true },
+      mWait: { label: "等待效率提及比例", unit: "個百分點", formatter: format.one, diffFormatter: value => value.toFixed(1), higherBetter: true },
+      mMildNegative: { label: "輕度負面提及比例", unit: "個百分點", formatter: format.one, diffFormatter: value => value.toFixed(1), higherBetter: false },
+      mPainPoint: { label: "負面痛點提及比例", unit: "個百分點", formatter: format.one, diffFormatter: value => value.toFixed(1), higherBetter: false }
+    };
+
+    const metricAdvice = {
+      star: diff => diff >= 0 ? "整體評價高於平均，建議維持評論中被稱讚的餐點與服務穩定度。" : "整體星等低於平均，建議優先檢查低分評論反覆出現的服務與等待問題。",
+      satisfaction: diff => diff >= 0 ? "高滿意比例優於平均，建議把主要好評元素轉成標準化話術與服務流程。" : "高滿意比例低於平均，建議強化顧客最容易感受到的餐點穩定度與接待節奏。",
+      improvement: diff => diff <= 0 ? "待改善比例低於平均，代表負面訊號相對少，仍可持續追蹤高頻痛點。" : "待改善比例高於平均，建議把近期評論依服務流程、等待效率、餐點品質分流處理。",
+      price: diff => diff >= 0 ? "消費金額高於平均，建議用份量、食材、體驗與套餐說明支撐價值感。" : "消費金額低於平均，可強調價格優勢，同時觀察是否仍有加價升級空間。",
+      food: diff => diff >= 0 ? "餐點分數高於平均，建議維持出餐品質與招牌品項的一致性。" : "餐點分數低於平均，建議檢查熟度、份量、醬汁濃淡與尖峰時段穩定度。",
+      service: diff => diff >= 0 ? "服務分數高於平均，建議延續目前接待節奏並複製到尖峰時段。" : "服務分數低於平均，建議優先檢查帶位、點餐說明、結帳與補水等接觸點。",
+      atmosphere: diff => diff >= 0 ? "氣氛分數高於平均，空間體驗是可持續放大的優勢。" : "氣氛分數低於平均，建議檢查座位舒適度、動線、噪音與店內氣味。",
+      mPriceValue: diff => diff >= 0 ? "價格價值感提及高於平均，可把划算、份量或套餐價值放進溝通重點。" : "價格價值感提及低於平均，建議強化菜單說明、套餐組合與高單價的價值理由。",
+      mRecommend: diff => diff >= 0 ? "推薦再訪提及高於平均，代表口碑動能較強，適合放大熟客與回訪理由。" : "推薦再訪提及低於平均，建議設計更明確的回訪誘因與分享型訊息。",
+      mServiceFlow: diff => diff >= 0 ? "服務流程被更多人提及，若多為正向可轉成品牌承諾；若混有負面需拆分尖峰流程。" : "服務流程提及低於平均，建議用更穩定的迎賓、點餐、結帳節奏增加顧客記憶點。",
+      mAtmosphere: diff => diff >= 0 ? "空間氣氛提及高於平均，適合用照片、座位情境與店內體驗強化行銷素材。" : "空間氣氛提及低於平均，建議改善可被拍照與描述的空間亮點。",
+      mWait: diff => diff >= 0 ? "等待效率提及高於平均，若為正向可強調出餐節奏；若伴隨抱怨需優先檢查排隊與候位資訊。" : "等待效率提及低於平均，代表此面向記憶度較弱，建議讓候位預期與出餐節奏更透明。",
+      mMildNegative: diff => diff <= 0 ? "輕度負面低於平均，短期風險較低，仍可追蹤是否集中於特定時段。" : "輕度負面高於平均，建議先處理容易累積不滿的小摩擦，例如候位、溝通與現場節奏。",
+      mPainPoint: diff => diff <= 0 ? "負面痛點低於平均，代表重大抱怨較少，可持續維持品質控管。" : "負面痛點高於平均，建議優先回看評論原文，找出最常重複的流程或產品缺口。"
+    };
+
+    function averageForMetric(metric) {
+      return stores.reduce((sum, item) => sum + item[metric], 0) / stores.length;
+    }
+
+    function rankForMetric(metric, name) {
+      const ordered = [...stores].sort((a, b) => b[metric] - a[metric]);
+      return ordered.findIndex(item => item.name === name) + 1;
+    }
+
+    function comparisonText(metric, value, average = averageForMetric(metric)) {
+      const meta = metricMeta[metric];
+      const diff = value - average;
+      if (Math.abs(diff) < 0.005) return `與六店平均相同`;
+      const direction = diff > 0 ? "高於" : "低於";
+      return `${direction}六店平均 ${meta.diffFormatter(Math.abs(diff))} ${meta.unit}`;
+    }
+
+    function selectedBarKey(chart, store, metric, topic = "") {
+      return [chart, store || "", metric || "", topic || ""].join("|");
+    }
+
+    function barBaseColor(bar) {
+      const chart = bar.dataset.chart;
+      const metric = bar.dataset.metric;
+      const marketingColors = {
+        mPriceValue: colors.mPriceValue,
+        mRecommend: colors.mRecommend,
+        mServiceFlow: colors.mServiceFlow,
+        mAtmosphere: colors.mAtmosphere,
+        mWait: colors.mWait,
+        mMildNegative: colors.mMildNegative,
+        mPainPoint: colors.mPainPoint
+      };
+      if (marketingColors[metric]) return marketingColors[metric];
+      if (chart === "price") return colors.cyan;
+      if (chart === "comments") return bar.dataset.series === "average" ? colors.average : colors.hamamatsu;
+      if (metric === "improvement" || metric === "service") return colors.orange;
+      if (metric === "atmosphere") return colors.green;
+      return colors.blue;
+    }
+
+    function marketingSeries() {
+      return [
+        { key: "mPriceValue", name: "價格價值感提及比例", color: colors.mPriceValue, formatter: format.one },
+        { key: "mRecommend", name: "推薦再訪提及比例", color: colors.mRecommend, formatter: format.one },
+        { key: "mServiceFlow", name: "服務流程提及比例", color: colors.mServiceFlow, formatter: format.one },
+        { key: "mAtmosphere", name: "空間氣氛提及比例", color: colors.mAtmosphere, formatter: format.one },
+        { key: "mWait", name: "等待效率提及比例", color: colors.mWait, formatter: format.one },
+        { key: "mMildNegative", name: "輕度負面提及比例", color: colors.mMildNegative, formatter: format.one },
+        { key: "mPainPoint", name: "負面痛點提及比例", color: colors.mPainPoint, formatter: format.one }
+      ];
+    }
+
+    function isBarSelected(bar) {
+      const chart = bar.dataset.chart;
+      const metric = bar.dataset.metric;
+      const store = bar.dataset.store || "";
+      const topic = bar.dataset.topic || "";
+      if (state.filter === "hamamatsu" && chart === "star" && store === "濱松屋") return true;
+      if (chart === "comments") return state.selectedKey === selectedBarKey(chart, store, metric, topic);
+      return state.selectedKey === selectedBarKey(chart, store, metric, topic);
+    }
+
+    function isBarDimmed(bar, selected) {
+      const chart = bar.dataset.chart;
+      const store = bar.dataset.store;
+      if (store && !storeVisible(store)) return true;
+      if (store && state.filter === "hamamatsu" && chart !== "star" && store !== "濱松屋") return true;
+      return Boolean(state.selectedKey && state.activeChart === chart && !selected);
+    }
+
+    function updateBars() {
+      document.querySelectorAll("rect.bar[data-chart]").forEach(bar => {
+        const selected = isBarSelected(bar);
+        bar.classList.toggle("is-selected", selected);
+        bar.classList.toggle("is-dim", isBarDimmed(bar, selected));
+        const shouldUseSelectedColor = selected && bar.dataset.chart !== "comments";
+        bar.setAttribute("fill", shouldUseSelectedColor ? colors.selected : barBaseColor(bar));
+      });
+      updateValueLabels();
+    }
+
+    function isValueLabelVisible(label) {
+      if (state.showAllValues) return true;
+      const chart = label.dataset.chart;
+      const metric = label.dataset.metric;
+      const store = label.dataset.store || "";
+      const topic = label.dataset.topic || "";
+      if (state.filter === "hamamatsu" && chart === "star" && store === "濱松屋") return true;
+      return state.selectedKey === selectedBarKey(chart, store, metric, topic);
+    }
+
+    function updateValueLabels() {
+      document.querySelectorAll(".bar-label.value-label[data-chart]").forEach(label => {
+        label.classList.toggle("is-visible", isValueLabelVisible(label));
+      });
+      const button = document.querySelector("#toggleValues");
+      if (button) {
+        button.textContent = state.showAllValues ? "隱藏所有數值" : "顯示所有數值";
+        button.setAttribute("aria-pressed", state.showAllValues ? "true" : "false");
+      }
+    }
+
+    function updateInteractiveView(animateText = true) {
+      updateBars();
+      updateChartSubtitles(animateText);
+      updateSummary(false);
+      renderStoreList();
+    }
+
+    function createSvg(width, height) {
+      const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+      svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
+      svg.classList.add("chart-svg");
+      return svg;
+    }
+
+    function el(name, attrs = {}, text = "") {
+      const node = document.createElementNS("http://www.w3.org/2000/svg", name);
+      Object.entries(attrs).forEach(([key, value]) => node.setAttribute(key, value));
+      if (text) node.textContent = text;
+      return node;
+    }
+
+    function clear(node) {
+      while (node.firstChild) node.removeChild(node.firstChild);
+    }
+
+    function animateNumber(node, to, formatter, duration = 900) {
+      const start = performance.now();
+      const from = 0;
+      function frame(now) {
+        const t = Math.min(1, (now - start) / duration);
+        const eased = 1 - Math.pow(1 - t, 3);
+        node.textContent = formatter(from + (to - from) * eased);
+        if (t < 1) requestAnimationFrame(frame);
+      }
+      requestAnimationFrame(frame);
+    }
+
+    function animateAttr(node, attr, to, duration = 900) {
+      const start = performance.now();
+      const from = Number(node.getAttribute(attr)) || 0;
+      function frame(now) {
+        const t = Math.min(1, (now - start) / duration);
+        const eased = 1 - Math.pow(1 - t, 3);
+        node.setAttribute(attr, from + (to - from) * eased);
+        if (t < 1) requestAnimationFrame(frame);
+      }
+      requestAnimationFrame(frame);
+    }
+
+    function storeVisible(name) {
+      if (state.filter === "hamamatsu") return name === "濱松屋";
+      if (state.filter === "top") {
+        const store = stores.find(item => item.name === name);
+        return store && store.satisfaction >= 86;
+      }
+      return true;
+    }
+
+    function showTip(event, html) {
+      tooltip.innerHTML = html;
+      tooltip.style.left = `${event.clientX}px`;
+      tooltip.style.top = `${event.clientY}px`;
+      tooltip.classList.add("is-visible");
+    }
+
+    function hideTip() {
+      tooltip.classList.remove("is-visible");
+    }
+
+    function attachBarEvents(node, options) {
+      node.addEventListener("mouseenter", event => showTip(event, options.tip));
+      node.addEventListener("mousemove", event => showTip(event, options.tip));
+      node.addEventListener("mouseleave", hideTip);
+      node.addEventListener("click", () => {
+        state.activeChart = options.chart || state.activeChart;
+        state.selectedMetric = options.metric || state.selectedMetric;
+        state.selectedStore = options.store || null;
+        state.selectedTopic = options.topic || null;
+        state.selectedKey = selectedBarKey(state.activeChart, state.selectedStore, state.selectedMetric, state.selectedTopic);
+        if (options.commentsMode) state.commentsMode = options.commentsMode;
+        updateInteractiveView(true);
+      });
+    }
+
+    function renderVerticalBarChart(targetId, data, config) {
+      const target = document.querySelector(targetId);
+      clear(target);
+      const width = 960;
+      const height = config.height || 330;
+      const margin = { top: 26, right: 24, bottom: 74, left: 58 };
+      const svg = createSvg(width, height);
+      target.appendChild(svg);
+
+      const plotW = width - margin.left - margin.right;
+      const plotH = height - margin.top - margin.bottom;
+      const max = config.max;
+      const step = config.step;
+
+      for (let tick = 0; tick <= max; tick += step) {
+        const y = margin.top + plotH - (tick / max) * plotH;
+        svg.appendChild(el("line", { x1: margin.left, x2: width - margin.right, y1: y, y2: y, class: "grid-line", opacity: tick === 0 ? 1 : 0.72 }));
+        svg.appendChild(el("text", { x: margin.left - 10, y: y + 4, "text-anchor": "end", class: "tick-label" }, `${tick}`));
+      }
+
+      const slot = plotW / data.length;
+      const barW = Math.min(118, slot * 0.58);
+
+      data.forEach((item, index) => {
+        const x = margin.left + slot * index + (slot - barW) / 2;
+        const finalH = (item.value / max) * plotH;
+        const y = margin.top + plotH - finalH;
+        const metric = config.metric || "star";
+        const barKey = selectedBarKey(config.chartId, item.name, metric);
+        const isSelected = state.selectedKey === barKey || (state.filter === "hamamatsu" && item.name === "濱松屋" && config.chartId !== "comments");
+        const isDim = !storeVisible(item.name) || (state.selectedKey && state.activeChart === config.chartId && !isSelected);
+        const comparison = config.metric ? comparisonText(config.metric, item.value) : "";
+        const bar = el("rect", {
+          x, y: margin.top + plotH, width: barW, height: 0, rx: 3,
+          fill: isSelected ? colors.selected : config.color,
+          class: `bar ${isDim ? "is-dim" : ""} ${isSelected ? "is-selected" : ""}`,
+          "data-chart": config.chartId,
+          "data-metric": metric,
+          "data-store": item.name
+        });
+        attachBarEvents(bar, {
+          chart: config.chartId,
+          metric,
+          store: item.name,
+          tip: `<b>${item.name}</b><br>${config.label}：${config.formatter(item.value)}${comparison ? `<br>${comparison}` : ""}`
+        });
+        svg.appendChild(bar);
+        animateAttr(bar, "height", finalH, config.animate ? 950 : 0);
+        animateAttr(bar, "y", y, config.animate ? 950 : 0);
+
+        const label = el("text", {
+          x: x + barW / 2,
+          y: y - 8,
+          "text-anchor": "middle",
+          class: "bar-label value-label",
+          "data-chart": config.chartId,
+          "data-metric": metric,
+          "data-store": item.name
+        });
+        svg.appendChild(label);
+        animateNumber(label, item.value, config.formatter, config.animate ? 950 : 0);
+
+        const name = el("text", {
+          x: x + barW / 2,
+          y: height - margin.bottom + 30,
+          "text-anchor": "middle",
+          class: "store-label",
+          "font-size": 13
+        }, item.name);
+        svg.appendChild(name);
+      });
+
+      svg.appendChild(el("text", { x: width / 2, y: height - 13, "text-anchor": "middle", class: "axis-label" }, config.xLabel));
+      svg.appendChild(el("text", { x: 18, y: margin.top + plotH / 2, transform: `rotate(-90 18 ${margin.top + plotH / 2})`, "text-anchor": "middle", class: "axis-label" }, config.yLabel));
+    }
+
+    function renderGroupedVerticalChart(targetId, data, series, config) {
+      const target = document.querySelector(targetId);
+      clear(target);
+      const width = 960;
+      const height = config.height || 350;
+      const margin = { top: 28, right: 22, bottom: 78, left: 58 };
+      const svg = createSvg(width, height);
+      target.appendChild(svg);
+      const plotW = width - margin.left - margin.right;
+      const plotH = height - margin.top - margin.bottom;
+      const max = config.max;
+
+      for (let tick = 0; tick <= max; tick += config.step) {
+        const y = margin.top + plotH - (tick / max) * plotH;
+        svg.appendChild(el("line", { x1: margin.left, x2: width - margin.right, y1: y, y2: y, class: "grid-line", opacity: tick === 0 ? 1 : 0.72 }));
+        svg.appendChild(el("text", { x: margin.left - 10, y: y + 4, "text-anchor": "end", class: "tick-label" }, `${tick}`));
+      }
+
+      const slot = plotW / data.length;
+      const groupW = Math.min(136, slot * 0.72);
+      const barW = groupW / series.length;
+
+      data.forEach((item, index) => {
+        const groupX = margin.left + slot * index + (slot - groupW) / 2;
+        series.forEach((serie, sIndex) => {
+          const value = item[serie.key];
+          const x = groupX + sIndex * barW;
+          const finalH = (value / max) * plotH;
+          const y = margin.top + plotH - finalH;
+          const barKey = selectedBarKey(config.chartId, item.name, serie.key);
+          const isSelected = state.selectedKey === barKey;
+          const isDim = !storeVisible(item.name) || (state.filter === "hamamatsu" && item.name !== "濱松屋") || (state.selectedKey && state.activeChart === config.chartId && !isSelected);
+          const comparison = comparisonText(serie.key, value);
+          const bar = el("rect", {
+            x: x + 1,
+            y: margin.top + plotH,
+            width: Math.max(7, barW - 2),
+            height: 0,
+            rx: 2,
+            fill: isSelected ? colors.selected : serie.color,
+            class: `bar ${isDim ? "is-dim" : ""} ${isSelected ? "is-selected" : ""}`,
+            "data-chart": config.chartId,
+            "data-metric": serie.key,
+            "data-store": item.name
+          });
+          attachBarEvents(bar, {
+            chart: config.chartId,
+            metric: serie.key,
+            store: item.name,
+            tip: `<b>${item.name}</b><br>${serie.name}：${serie.formatter(value)}<br>${comparison}`
+          });
+          svg.appendChild(bar);
+          animateAttr(bar, "height", finalH, config.animate ? 1000 : 0);
+          animateAttr(bar, "y", y, config.animate ? 1000 : 0);
+
+          const label = el("text", {
+            x: x + barW / 2,
+            y: y - 7,
+            "text-anchor": "middle",
+            class: "bar-label value-label",
+            "data-chart": config.chartId,
+            "data-metric": serie.key,
+            "data-store": item.name,
+            "font-size": series.length > 4 ? 9 : series.length > 2 ? 11 : 13
+          });
+          svg.appendChild(label);
+          animateNumber(label, value, serie.formatter, config.animate ? 1000 : 0);
+        });
+
+        const name = el("text", {
+          x: groupX + groupW / 2,
+          y: height - margin.bottom + 30,
+          "text-anchor": "middle",
+          class: "store-label",
+          "font-size": 13
+        }, item.name);
+        svg.appendChild(name);
+      });
+
+      svg.appendChild(el("text", { x: width / 2, y: height - 13, "text-anchor": "middle", class: "axis-label" }, config.xLabel));
+      svg.appendChild(el("text", { x: 18, y: margin.top + plotH / 2, transform: `rotate(-90 18 ${margin.top + plotH / 2})`, "text-anchor": "middle", class: "axis-label" }, config.yLabel));
+    }
+
+    function renderHorizontalComparison(targetId, data, config) {
+      const target = document.querySelector(targetId);
+      clear(target);
+      const width = 820;
+      const height = config.height;
+      const margin = { top: 30, right: 96, bottom: 54, left: 112 };
+      const svg = createSvg(width, height);
+      target.appendChild(svg);
+      const plotW = width - margin.left - margin.right;
+      const plotH = height - margin.top - margin.bottom;
+      const rowH = plotH / data.length;
+      const barH = Math.min(18, rowH * 0.34);
+      const max = config.max;
+
+      for (let tick = 0; tick <= max; tick += config.step) {
+        const x = margin.left + (tick / max) * plotW;
+        svg.appendChild(el("line", { x1: x, x2: x, y1: margin.top, y2: margin.top + plotH, class: "grid-line", opacity: tick === 0 ? 1 : 0.76 }));
+        svg.appendChild(el("text", { x, y: margin.top + plotH + 25, "text-anchor": "middle", class: "tick-label" }, `${tick}`));
+      }
+
+      data.forEach((item, index) => {
+        const centerY = margin.top + rowH * index + rowH / 2;
+        const label = el("text", { x: margin.left - 12, y: centerY + 5, "text-anchor": "end", class: "store-label", "font-size": 14 }, item.topic);
+        svg.appendChild(label);
+
+        [
+          { key: "hamamatsu", color: colors.hamamatsu, name: "濱松屋", y: centerY - barH },
+          { key: "average", color: colors.average, name: "六店平均", y: centerY }
+        ].forEach(serie => {
+          const value = item[serie.key];
+          const finalW = (value / max) * plotW;
+          const barKey = selectedBarKey("comments", "", config.mode, item.topic);
+          const isSelected = state.selectedKey === barKey;
+          const isDim = state.selectedTopic && state.selectedTopic !== item.topic;
+          const diff = item.hamamatsu - item.average;
+          const commentComparison = Math.abs(diff) < 0.05
+            ? "濱松屋與六店平均相同"
+            : `濱松屋${diff > 0 ? "高於" : "低於"}六店平均 ${Math.abs(diff).toFixed(1)} 個百分點`;
+          const bar = el("rect", {
+            x: margin.left,
+            y: serie.y,
+            width: 0,
+            height: barH,
+            rx: 2,
+            fill: serie.color,
+            class: `bar ${isDim ? "is-dim" : ""} ${isSelected ? "is-selected" : ""}`,
+            "data-chart": "comments",
+            "data-metric": config.mode,
+            "data-topic": item.topic,
+            "data-series": serie.key
+          });
+          attachBarEvents(bar, {
+            chart: "comments",
+            metric: config.mode,
+            topic: item.topic,
+            commentsMode: config.mode,
+            tip: `<b>${item.topic}</b><br>${serie.name}：${value.toFixed(1)}%<br>${commentComparison}`
+          });
+          svg.appendChild(bar);
+          animateAttr(bar, "width", finalW, config.animate ? 1050 : 0);
+
+          const valueText = el("text", {
+            x: margin.left + finalW + 8,
+            y: serie.y + barH - 4,
+            class: "bar-label value-label",
+            "data-chart": "comments",
+            "data-metric": config.mode,
+            "data-topic": item.topic,
+            "data-series": serie.key
+          });
+          svg.appendChild(valueText);
+          animateNumber(valueText, value, format.one, config.animate ? 1050 : 0);
+        });
+      });
+
+      svg.appendChild(el("text", { x: margin.left + plotW / 2, y: height - 11, "text-anchor": "middle", class: "axis-label" }, "提及比例（%）"));
+    }
+
+    function averageStore() {
+      return {
+        name: "六店平均",
+        star: averageForMetric("star"),
+        satisfaction: averageForMetric("satisfaction"),
+        improvement: averageForMetric("improvement"),
+        price: averageForMetric("price"),
+        food: averageForMetric("food"),
+        service: averageForMetric("service"),
+        atmosphere: averageForMetric("atmosphere")
+      };
+    }
+
+    function activeCommentItem() {
+      const source = state.commentsMode === "advantage" ? advantages : weaknesses;
+      if (state.selectedTopic) return source.find(item => item.topic === state.selectedTopic) || source[0];
+      return source.map(item => ({ ...item, diff: item.hamamatsu - item.average }))
+        .sort((a, b) => Math.abs(b.diff) - Math.abs(a.diff))[0];
+    }
+
+    function commentAdvice(mode, diff, topic) {
+      if (mode === "advantage") {
+        if (diff >= 0) return `${topic} 已經比平均更常被正向提及，建議把它放進主打訊息與現場服務話術。`;
+        return `${topic} 雖屬優勢面向但低於平均，建議檢查顧客好評素材是否不夠集中或不夠明確。`;
+      }
+      if (diff > 0) return `${topic} 的待改善提及高於平均，建議優先拆解評論原文，找出可立即修正的流程或品質節點。`;
+      return `${topic} 的待改善提及低於平均，暫時不是最大風險，但仍應持續追蹤是否集中在特定時段。`;
+    }
+
+    function setFadedText(node, text, animate = true) {
+      if (!node || node.textContent === text) return;
+      clearTimeout(node._fadeTimer);
+      if (!animate) {
+        node.textContent = text;
+        return;
+      }
+      node.classList.add("is-fading");
+      node._fadeTimer = setTimeout(() => {
+        node.textContent = text;
+        node.classList.remove("is-fading");
+      }, 180);
+    }
+
+    function metricSubtitle(storeName, metric) {
+      const store = stores.find(item => item.name === storeName);
+      const meta = metricMeta[metric];
+      if (!store || !meta) return "";
+      return `${store.name}：${meta.label} ${meta.formatter(store[metric])}，${comparisonText(metric, store[metric])}。`;
+    }
+
+    function commentSubtitle() {
+      const source = state.commentsMode === "advantage" ? advantages : weaknesses;
+      if (!state.selectedTopic) {
+        return state.commentsMode === "advantage"
+          ? "點擊任一優勢留言長條，可查看濱松屋與六店平均的提及比例差異。"
+          : "點擊任一待改善留言長條，可查看濱松屋高於或低於六店平均多少。";
+      }
+      const item = source.find(row => row.topic === state.selectedTopic);
+      if (!item) return "";
+      const diff = item.hamamatsu - item.average;
+      const direction = Math.abs(diff) < 0.05 ? "與六店平均相同" : `${diff > 0 ? "高於" : "低於"}六店平均 ${Math.abs(diff).toFixed(1)} 個百分點`;
+      return `${item.topic}：濱松屋 ${item.hamamatsu.toFixed(1)}%，${direction}。`;
+    }
+
+    function subtitleForChart(chart) {
+      if (chart === "star" && state.activeChart === "star" && state.selectedStore) {
+        return metricSubtitle(state.selectedStore, "star");
+      }
+      if (chart === "satisfaction" && state.activeChart === "satisfaction" && state.selectedStore) {
+        return metricSubtitle(state.selectedStore, state.selectedMetric);
+      }
+      if (chart === "score" && state.activeChart === "score" && state.selectedStore) {
+        return metricSubtitle(state.selectedStore, state.selectedMetric);
+      }
+      if (chart === "marketing" && state.activeChart === "marketing" && state.selectedStore) {
+        return metricSubtitle(state.selectedStore, state.selectedMetric);
+      }
+      if (chart === "price" && state.activeChart === "price" && state.selectedStore) {
+        return metricSubtitle(state.selectedStore, "price");
+      }
+      const defaults = {
+        star: "點擊任一餐廳長條，可查看星等高於或低於六店平均多少。",
+        satisfaction: "點擊高滿意或待改善長條，可查看該比例與六店平均的差距。",
+        score: "點擊餐點、服務、氣氛長條，可查看該評分高於或低於六店平均。",
+        marketing: "此區塊為客戶文字留言提及七大面向指標比例。",
+        price: "點擊任一餐廳長條，可查看平均消費高於或低於六店平均多少元。"
+      };
+      return defaults[chart];
+    }
+
+    function updateChartSubtitles(animate = true) {
+      setFadedText(document.querySelector("#starSubtitle"), subtitleForChart("star"), animate);
+      setFadedText(document.querySelector("#satisfactionSubtitle"), subtitleForChart("satisfaction"), animate);
+      setFadedText(document.querySelector("#scoreSubtitle"), subtitleForChart("score"), animate);
+      setFadedText(document.querySelector("#marketingSubtitle"), subtitleForChart("marketing"), animate);
+      setFadedText(document.querySelector("#priceSubtitle"), subtitleForChart("price"), animate);
+      setFadedText(document.querySelector("#commentChartSubtitle"), commentSubtitle(), animate);
+    }
+
+    function updateSummary(animate = true) {
+      const focus = stores.find(item => item.name === state.selectedStore) || averageStore();
+      const isCommentFocus = state.activeChart === "comments";
+      const activeMetric = metricMeta[state.selectedMetric] ? state.selectedMetric : "star";
+      const meta = metricMeta[activeMetric];
+
+      if (isCommentFocus) {
+        const item = activeCommentItem();
+        const diff = item.hamamatsu - item.average;
+        const modeLabel = state.commentsMode === "advantage" ? "優勢留言" : "待改善留言";
+        document.querySelector("#focusName").textContent = `${modeLabel}：${item.topic}`;
+        document.querySelector("#focusRank").textContent = `${diff >= 0 ? "+" : ""}${diff.toFixed(1)}pp`;
+        document.querySelector("#summaryText").textContent = `目前聚焦 ${modeLabel} 的「${item.topic}」。`;
+      } else {
+        const rank = state.selectedStore ? rankForMetric(activeMetric, focus.name) : null;
+        document.querySelector("#focusName").textContent = focus.name;
+        document.querySelector("#focusRank").textContent = rank ? `第 ${rank}` : "平均";
+        document.querySelector("#summaryText").textContent = state.selectedStore
+          ? `目前聚焦 ${focus.name} 的「${meta.label}」。`
+          : state.filter === "top"
+            ? "目前顯示高滿意組，點擊長條可查看差異。"
+            : "目前顯示全部餐廳，點擊長條可查看差異。";
+      }
+
+      const kpis = {
+        star: [focus.star, value => value.toFixed(2)],
+        satisfaction: [focus.satisfaction, format.one],
+        improvement: [focus.improvement, format.one],
+        price: [focus.price, format.price]
+      };
+      Object.entries(kpis).forEach(([key, [value, formatter]]) => {
+        const node = document.querySelector(`[data-kpi="${key}"]`);
+        if (animate) animateNumber(node, value, formatter, 800);
+        else node.textContent = formatter(value);
+      });
+
+      const metrics = [
+        ["餐點", focus.food, 5, colors.blue, value => value.toFixed(2)],
+        ["服務", focus.service, 5, colors.orange, value => value.toFixed(2)],
+        ["氣氛", focus.atmosphere, 5, colors.green, value => value.toFixed(2)],
+        ["高滿意", focus.satisfaction, 100, colors.hamamatsu, format.one],
+        ["待改善", focus.improvement, 100, colors.average, format.one]
+      ];
+      const metricsWrap = document.querySelector("#focusMetrics");
+      clear(metricsWrap);
+      metrics.forEach(([name, value, max, color, formatter]) => {
+        const row = document.createElement("div");
+        row.className = "metric-line";
+        row.innerHTML = `<span>${name}</span><span class="meter"><i style="background:${color}"></i></span><b>${formatter(value)}</b>`;
+        metricsWrap.appendChild(row);
+        requestAnimationFrame(() => row.querySelector("i").style.width = `${Math.min(100, value / max * 100)}%`);
+      });
+
+      const insightWrap = document.querySelector("#insights");
+      clear(insightWrap);
+      let insightLines;
+      if (isCommentFocus) {
+        const item = activeCommentItem();
+        const diff = item.hamamatsu - item.average;
+        const direction = Math.abs(diff) < 0.05 ? "與六店平均相同" : `${diff > 0 ? "高於" : "低於"}六店平均 ${Math.abs(diff).toFixed(1)} 個百分點`;
+        insightLines = [
+          `濱松屋「<b>${item.topic}</b>」提及比例為 <b>${item.hamamatsu.toFixed(1)}%</b>，六店平均為 <b>${item.average.toFixed(1)}%</b>。`,
+          `此項目目前 <b>${direction}</b>。`,
+          commentAdvice(state.commentsMode, diff, item.topic)
+        ];
+      } else if (state.selectedStore) {
+        const average = averageForMetric(activeMetric);
+        const value = focus[activeMetric];
+        const diff = value - average;
+        insightLines = [
+          `${focus.name} 的 <b>${meta.label}</b> 為 <b>${meta.formatter(value)}</b>，六店平均為 <b>${meta.formatter(average)}</b>。`,
+          `此項目 <b>${comparisonText(activeMetric, value, average)}</b>，目前排名第 <b>${rankForMetric(activeMetric, focus.name)}</b>。`,
+          metricAdvice[activeMetric](diff)
+        ];
+      } else {
+        const topAdv = advantages.map(item => ({ ...item, diff: item.hamamatsu - item.average })).sort((a, b) => b.diff - a.diff)[0];
+        const topWeak = weaknesses.map(item => ({ ...item, diff: item.hamamatsu - item.average })).sort((a, b) => b.diff - a.diff)[0];
+        insightLines = [
+          `六店平均星等為 <b>${averageForMetric("star").toFixed(2)}</b>，可點擊任一長條查看個別差異。`,
+          `濱松屋優勢以 <b>${topAdv.topic}</b> 較突出，高於六店平均 ${topAdv.diff.toFixed(1)} 個百分點。`,
+          `待改善訊號以 <b>${topWeak.topic}</b> 最需要注意，高於六店平均 ${topWeak.diff.toFixed(1)} 個百分點。`
+        ];
+      }
+
+      insightLines.forEach(text => {
+        const div = document.createElement("div");
+        div.className = "insight";
+        div.innerHTML = text;
+        insightWrap.appendChild(div);
+      });
+    }
+
+    function renderStoreList() {
+      const list = document.querySelector("#storeList");
+      clear(list);
+      const header = list.closest(".panel").querySelector(".panel-header");
+      const title = header.querySelector("h2");
+      const note = header.querySelector("p");
+
+      if (state.activeChart === "comments") {
+        const source = state.commentsMode === "advantage" ? advantages : weaknesses;
+        const modeLabel = state.commentsMode === "advantage" ? "優勢留言" : "待改善留言";
+        title.textContent = `${modeLabel}排行`;
+        note.textContent = "依濱松屋提及比例排序。";
+        [...source].sort((a, b) => b.hamamatsu - a.hamamatsu).forEach((item, index) => {
+          const button = document.createElement("button");
+          button.className = `store-row ${state.selectedTopic === item.topic ? "is-active" : ""}`;
+          button.innerHTML = `<span>${index + 1}. ${item.topic}</span><b>${item.hamamatsu.toFixed(1)}%</b>`;
+          button.addEventListener("click", () => {
+            state.activeChart = "comments";
+            state.selectedMetric = state.commentsMode;
+            state.selectedStore = null;
+            state.selectedTopic = item.topic;
+            state.selectedKey = selectedBarKey("comments", "", state.commentsMode, item.topic);
+            updateInteractiveView(true);
+          });
+          list.appendChild(button);
+        });
+        return;
+      }
+
+      const metric = metricMeta[state.selectedMetric] ? state.selectedMetric : "star";
+      const meta = metricMeta[metric];
+      title.textContent = `${meta.label}排行`;
+      note.textContent = metric === "improvement" ? "依待改善比例高到低排序。" : `依${meta.label}高到低排序。`;
+      [...stores].sort((a, b) => b[metric] - a[metric]).forEach((store, index) => {
+        const button = document.createElement("button");
+        button.className = `store-row ${state.selectedStore === store.name ? "is-active" : ""}`;
+        button.innerHTML = `<span>${index + 1}. ${store.name}</span><b>${meta.formatter(store[metric])}</b>`;
+        button.addEventListener("click", () => {
+          state.selectedStore = store.name;
+          state.selectedTopic = null;
+          state.filter = "all";
+          state.selectedKey = selectedBarKey(state.activeChart, store.name, metric);
+          document.querySelectorAll("[data-filter]").forEach(chip => {
+            chip.classList.toggle("is-active", chip.dataset.filter === state.filter);
+          });
+          updateInteractiveView(true);
+        });
+        list.appendChild(button);
+      });
+    }
+
+    function renderAll(animate = true) {
+      readThemeColors();
+      renderVerticalBarChart("#starChart", stores.map(item => ({ name: item.name, value: item.star })), {
+        chartId: "star",
+        metric: "star",
+        max: 5,
+        step: 1,
+        color: colors.blue,
+        label: "平均星等",
+        xLabel: "餐廳名稱",
+        yLabel: "平均星等",
+        formatter: value => value.toFixed(2),
+        animate
+      });
+
+      renderGroupedVerticalChart("#satisfactionChart", stores, [
+        { key: "satisfaction", name: "高滿意比例", color: colors.blue, formatter: format.one },
+        { key: "improvement", name: "待改善比例", color: colors.orange, formatter: format.one }
+      ], {
+        chartId: "satisfaction",
+        max: 100,
+        step: 20,
+        xLabel: "餐廳名稱",
+        yLabel: "比例（%）",
+        animate
+      });
+
+      renderGroupedVerticalChart("#scoreChart", stores, [
+        { key: "food", name: "餐點", color: colors.blue, formatter: value => value.toFixed(2) },
+        { key: "service", name: "服務", color: colors.orange, formatter: value => value.toFixed(2) },
+        { key: "atmosphere", name: "氣氛", color: colors.green, formatter: value => value.toFixed(2) }
+      ], {
+        chartId: "score",
+        max: 5.3,
+        step: 1,
+        xLabel: "餐廳名稱",
+        yLabel: "平均評分",
+        animate
+      });
+
+      renderGroupedVerticalChart("#marketingChart", stores, marketingSeries(), {
+        chartId: "marketing",
+        max: 80,
+        step: 20,
+        height: 470,
+        xLabel: "餐廳名稱",
+        yLabel: "提及比例（%）",
+        animate
+      });
+
+      const priceData = priceOrder.map(name => stores.find(item => item.name === name)).map(item => ({ name: item.name, value: item.price }));
+      renderVerticalBarChart("#priceChart", priceData, {
+        chartId: "price",
+        metric: "price",
+        max: 1300,
+        step: 260,
+        color: colors.cyan,
+        label: "平均消費金額",
+        xLabel: "餐廳名稱",
+        yLabel: "平均消費金額（元）",
+        formatter: value => Math.round(value).toLocaleString("zh-TW"),
+        animate
+      });
+
+      const commentSource = state.commentsMode === "advantage" ? advantages : weaknesses;
+      document.querySelector("#commentChartTitle").textContent = state.commentsMode === "advantage" ? "濱松屋優勢留言" : "濱松屋劣勢／待改善留言";
+      document.querySelectorAll("[data-comment-mode]").forEach(button => {
+        button.classList.toggle("is-active", button.dataset.commentMode === state.commentsMode);
+      });
+      renderHorizontalComparison("#commentChart", commentSource, {
+        mode: state.commentsMode,
+        max: state.commentsMode === "advantage" ? 90 : 28,
+        step: state.commentsMode === "advantage" ? 20 : 5,
+        height: state.commentsMode === "advantage" ? 470 : 560,
+        animate
+      });
+
+      updateSummary(animate);
+      renderStoreList();
+      updateChartSubtitles(animate);
+      updateBars();
+    }
+
+    document.querySelectorAll("[data-filter]").forEach(chip => {
+      chip.addEventListener("click", () => {
+        state.filter = chip.dataset.filter;
+        state.selectedTopic = null;
+        if (state.filter === "hamamatsu") {
+          state.activeChart = "star";
+          state.selectedMetric = "star";
+          state.selectedStore = "濱松屋";
+          state.selectedKey = selectedBarKey("star", "濱松屋", "star");
+        } else if (state.filter === "top") {
+          state.activeChart = "satisfaction";
+          state.selectedMetric = "satisfaction";
+          state.selectedStore = null;
+          state.selectedKey = null;
+        } else {
+          state.selectedStore = null;
+          state.selectedKey = null;
+        }
+        document.querySelectorAll("[data-filter]").forEach(item => item.classList.toggle("is-active", item === chip));
+        renderAll(true);
+      });
+    });
+
+    document.querySelectorAll("[data-comment-mode]").forEach(button => {
+      button.addEventListener("click", () => {
+        state.commentsMode = button.dataset.commentMode;
+        state.activeChart = "comments";
+        state.selectedMetric = state.commentsMode;
+        state.selectedStore = null;
+        state.selectedTopic = null;
+        state.selectedKey = null;
+        renderAll(true);
+      });
+    });
+
+    document.querySelectorAll(".theme-button[data-theme]").forEach(button => {
+      button.addEventListener("click", () => {
+        document.body.dataset.theme = button.dataset.theme;
+        document.querySelectorAll(".theme-button[data-theme]").forEach(item => {
+          item.classList.toggle("is-active", item === button);
+        });
+        requestAnimationFrame(() => {
+          readThemeColors();
+          updateBars();
+          updateSummary(false);
+        });
+      });
+    });
+
+    document.querySelector("#toggleValues").addEventListener("click", () => {
+      state.showAllValues = !state.showAllValues;
+      updateValueLabels();
+    });
+
+    document.querySelector("#replay").addEventListener("click", () => renderAll(true));
+
+    renderAll(true);
+  </script>
+</body>
+</html>
